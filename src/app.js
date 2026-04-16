@@ -1,25 +1,22 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { Pane } from 'tweakpane';
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { Pane } from "tweakpane";
 
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
-import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
-import { BrightnessContrastShader } from 'three/addons/shaders/BrightnessContrastShader.js';
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { BrightnessContrastShader } from "three/addons/shaders/BrightnessContrastShader.js";
 
-import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
-import { LUTCubeLoader } from 'three/addons/loaders/LUTCubeLoader.js';
+import { LUTPass } from "three/addons/postprocessing/LUTPass.js";
+import { LUTCubeLoader } from "three/addons/loaders/LUTCubeLoader.js";
 
-import { BloomPass } from './bloomPass.js';
-
-
+import { BloomPass } from "./bloomPass.js";
 
 class App {
-
   #threejs_ = null;
   #camera_ = null;
   #scene_ = null;
@@ -29,15 +26,18 @@ class App {
   #composer_ = null;
   #debugUI_ = null;
 
-  constructor() {
-  }
+  constructor() {}
 
   async initialize() {
     this.#clock_ = new THREE.Clock(true);
 
-    window.addEventListener('resize', () => {
-      this.#onWindowResize_();
-    }, false);
+    window.addEventListener(
+      "resize",
+      () => {
+        this.#onWindowResize_();
+      },
+      false,
+    );
 
     await this.#setupProject_();
 
@@ -49,18 +49,24 @@ class App {
     await this.#setupRenderer_();
 
     // Initialize post fx
-    const postFXFolder = this.#debugUI_.addFolder({ title: 'PostFX', expanded: false });
+    const postFXFolder = this.#debugUI_.addFolder({
+      title: "PostFX",
+      expanded: false,
+    });
 
     await this.#setupPostprocessing_(postFXFolder);
 
     // Initialize project
-    const projectFolder = this.#debugUI_.addFolder({ title: 'Project', expanded: true });
+    const projectFolder = this.#debugUI_.addFolder({
+      title: "Project",
+      expanded: true,
+    });
 
     await this.onSetupProject(projectFolder);
   }
 
   async #setupRenderer_() {
-    this.#threejs_ = new THREE.WebGLRenderer( { antialias: true } );
+    this.#threejs_ = new THREE.WebGLRenderer({ antialias: true });
     this.#threejs_.shadowMap.enabled = true;
     this.#threejs_.shadowMap.type = THREE.PCFSoftShadowMap;
     this.#threejs_.toneMapping = THREE.ACESFilmicToneMapping;
@@ -77,11 +83,14 @@ class App {
     this.#camera_.position.set(9, 2, -5);
     this.#camera_.lookAt(new THREE.Vector3(0, 0, 0));
 
-    this.#controls_ = new OrbitControls(this.#camera_, this.#threejs_.domElement);
+    this.#controls_ = new OrbitControls(
+      this.#camera_,
+      this.#threejs_.domElement,
+    );
     this.#controls_.enableDamping = true;
-    this.#controls_.target.set(0, 0, 0);
+    // this.#controls_.target.set(0, 0, 0);
     this.#controls_.minDistance = 1;
-    this.#controls_.maxDistance = 10;
+    this.#controls_.maxDistance = 100;
     this.#controls_.update();
 
     this.#scene_ = new THREE.Scene();
@@ -91,34 +100,46 @@ class App {
     this.#scene_.backgroundBlurriness = 0;
     this.#scene_.backgroundIntensity = 1;
     this.#scene_.environmentIntensity = 1;
-    const sceneFolder = this.#debugUI_.addFolder({ title: 'Scene', expanded: false });
-    sceneFolder.addBinding(this.#scene_, 'backgroundBlurriness', { min: 0.0, max: 1.0 });
-    sceneFolder.addBinding(this.#scene_, 'backgroundIntensity', { min: 0.0, max: 1.0 });
-    sceneFolder.addBinding(this.#scene_, 'environmentIntensity', { min: 0.0, max: 1.0 });
+    const sceneFolder = this.#debugUI_.addFolder({
+      title: "Scene",
+      expanded: false,
+    });
+    sceneFolder.addBinding(this.#scene_, "backgroundBlurriness", {
+      min: 0.0,
+      max: 1.0,
+    });
+    sceneFolder.addBinding(this.#scene_, "backgroundIntensity", {
+      min: 0.0,
+      max: 1.0,
+    });
+    sceneFolder.addBinding(this.#scene_, "environmentIntensity", {
+      min: 0.0,
+      max: 1.0,
+    });
   }
 
   get Scene() {
     return this.#scene_;
   }
-  
-  async #setupPostprocessing_(pane) {
 
+  async #setupPostprocessing_(pane) {
     this.#composer_ = new EffectComposer(this.#threejs_);
     const renderPass = new RenderPass(this.#scene_, this.#camera_);
     const outputPass = new OutputPass();
 
     const smaaPass = new SMAAPass(window.innerWidth, window.innerHeight);
     smaaPass.enabled = false;
-    const smaaFolder = pane.addFolder({ title: 'SMAA' });
-    smaaFolder.addBinding(smaaPass, 'enabled');
+    const smaaFolder = pane.addFolder({ title: "SMAA" });
+    smaaFolder.addBinding(smaaPass, "enabled");
 
     // LUTS
     const lutPass = new LUTPass();
 
     const luts = {
-      'Rec709_Fujifilm_3510_D65': './resources/luts/Rec709_Fujifilm_3510_D65.cube',
-      'Rec709_Kodak_2383_D65': './resources/luts/Rec709_Kodak_2383_D65.cube',
-      'Rec709_Kodak_2393_D65': './resources/luts/Rec709_Kodak_2393_D65.cube',
+      Rec709_Fujifilm_3510_D65:
+        "./resources/luts/Rec709_Fujifilm_3510_D65.cube",
+      Rec709_Kodak_2383_D65: "./resources/luts/Rec709_Kodak_2383_D65.cube",
+      Rec709_Kodak_2393_D65: "./resources/luts/Rec709_Kodak_2393_D65.cube",
     };
 
     const lutPathToTexture = {};
@@ -131,23 +152,25 @@ class App {
         lutPathToTexture[lutPath] = texture;
       });
     }
-    const lutFolder = pane.addFolder({ title: 'LUT' });
+    const lutFolder = pane.addFolder({ title: "LUT" });
 
     lutManager.onLoad = () => {
       const options = {
-        lut: luts['Rec709_Fujifilm_3510_D65'],
+        lut: luts["Rec709_Fujifilm_3510_D65"],
       };
       lutPass.intensity = 0.5;
       lutPass.lut = lutPathToTexture[options.lut].texture3D;
-      lutFolder.addBinding(lutPass, 'enabled');
-      lutFolder.addBinding(lutPass, 'intensity', { min: 0.0, max: 1.0 });
-      lutFolder.addBinding(options, 'lut', {
-        options: luts,
-      }).on('change', (e) => {
-        const lut = lutPathToTexture[e.value];
+      lutFolder.addBinding(lutPass, "enabled");
+      lutFolder.addBinding(lutPass, "intensity", { min: 0.0, max: 1.0 });
+      lutFolder
+        .addBinding(options, "lut", {
+          options: luts,
+        })
+        .on("change", (e) => {
+          const lut = lutPathToTexture[e.value];
 
-        lutPass.lut = lut.texture3D;
-      });
+          lutPass.lut = lut.texture3D;
+        });
     };
 
     const gtaoPass = new GTAOPass(this.#scene_, this.#camera_);
@@ -156,49 +179,53 @@ class App {
 
     const aoParameters = {
       radius: 0.25,
-      distanceExponent: 1.,
-      thickness: 1.,
-      scale: 1.,
+      distanceExponent: 1,
+      thickness: 1,
+      scale: 1,
       samples: 16,
-      distanceFallOff: 1.,
+      distanceFallOff: 1,
       screenSpaceRadius: false,
     };
     const pdParameters = {
-      lumaPhi: 10.,
-      depthPhi: 2.,
-      normalPhi: 3.,
-      radius: 4.,
-      radiusExponent: 1.,
-      rings: 2.,
+      lumaPhi: 10,
+      depthPhi: 2,
+      normalPhi: 3,
+      radius: 4,
+      radiusExponent: 1,
+      rings: 2,
       samples: 4,
     };
     gtaoPass.blendIntensity = 1;
-    gtaoPass.updateGtaoMaterial( aoParameters );
-    gtaoPass.updatePdMaterial( pdParameters );
+    gtaoPass.updateGtaoMaterial(aoParameters);
+    gtaoPass.updatePdMaterial(pdParameters);
 
-    const gtaoFolder = pane.addFolder({ title: 'GTAO' });
-    gtaoFolder.addBinding(gtaoPass, 'enabled');
-    gtaoFolder.addBinding(gtaoPass, 'output', {
+    const gtaoFolder = pane.addFolder({ title: "GTAO" });
+    gtaoFolder.addBinding(gtaoPass, "enabled");
+    gtaoFolder.addBinding(gtaoPass, "output", {
       options: {
-        'Default': GTAOPass.OUTPUT.Default,
-        'Diffuse': GTAOPass.OUTPUT.Diffuse,
-        'AO Only': GTAOPass.OUTPUT.AO,
-        'AO Only + Denoise': GTAOPass.OUTPUT.Denoise,
-        'Depth': GTAOPass.OUTPUT.Depth,
-        'Normal': GTAOPass.OUTPUT.Normal
-      }
+        Default: GTAOPass.OUTPUT.Default,
+        Diffuse: GTAOPass.OUTPUT.Diffuse,
+        "AO Only": GTAOPass.OUTPUT.AO,
+        "AO Only + Denoise": GTAOPass.OUTPUT.Denoise,
+        Depth: GTAOPass.OUTPUT.Depth,
+        Normal: GTAOPass.OUTPUT.Normal,
+      },
     });
-    gtaoFolder.addBinding(gtaoPass, 'blendIntensity', { min: 0.0, max: 1.0 });
-    gtaoFolder.addBinding(aoParameters, 'samples', { min: 1, max: 32, step: 1 }).on('change', (e) => {
-      gtaoPass.updateGtaoMaterial( aoParameters );
-    });
-    gtaoFolder.addBinding(aoParameters, 'radius', { min: 0.0, max: 1.0 }).on('change', (e) => {
-      gtaoPass.updateGtaoMaterial( aoParameters );
-    });
+    gtaoFolder.addBinding(gtaoPass, "blendIntensity", { min: 0.0, max: 1.0 });
+    gtaoFolder
+      .addBinding(aoParameters, "samples", { min: 1, max: 32, step: 1 })
+      .on("change", (e) => {
+        gtaoPass.updateGtaoMaterial(aoParameters);
+      });
+    gtaoFolder
+      .addBinding(aoParameters, "radius", { min: 0.0, max: 1.0 })
+      .on("change", (e) => {
+        gtaoPass.updateGtaoMaterial(aoParameters);
+      });
 
     // Shader pass
-    const vsh = await fetch('resources/shaders/vignette-vsh.glsl');
-    const fsh = await fetch('resources/shaders/vignette-fsh.glsl');
+    const vsh = await fetch("resources/shaders/vignette/vertex.glsl");
+    const fsh = await fetch("resources/shaders/vignette/fragment.glsl");
 
     const vshText = await vsh.text();
     const fshText = await fsh.text();
@@ -219,16 +246,20 @@ class App {
       intensity: shaderData.uniforms.intensity.value,
       dropoff: shaderData.uniforms.dropoff.value,
     };
-    const shaderFolder = pane.addFolder({ title: 'vignette' });
-    shaderFolder.addBinding(vignettePass, 'enabled');
-    shaderFolder.addBinding(shaderOptions, 'intensity', { min: 0.0, max: 1.0 }).on('change', (e) => {
-      vignettePass.material.uniforms.intensity.value = e.value;
-    });
-    shaderFolder.addBinding(shaderOptions, 'dropoff', { min: 0.0, max: 1.0 }).on('change', (e) => {
-      vignettePass.material.uniforms.dropoff.value = e.value;
-    });
+    const shaderFolder = pane.addFolder({ title: "vignette" });
+    shaderFolder.addBinding(vignettePass, "enabled");
+    shaderFolder
+      .addBinding(shaderOptions, "intensity", { min: 0.0, max: 1.0 })
+      .on("change", (e) => {
+        vignettePass.material.uniforms.intensity.value = e.value;
+      });
+    shaderFolder
+      .addBinding(shaderOptions, "dropoff", { min: 0.0, max: 1.0 })
+      .on("change", (e) => {
+        vignettePass.material.uniforms.dropoff.value = e.value;
+      });
 
-    const colorCorrectionFolder = pane.addFolder({ title: 'Color Correction' });
+    const colorCorrectionFolder = pane.addFolder({ title: "Color Correction" });
 
     const colorCorrectionParams = {
       brightness: 0.0,
@@ -238,24 +269,45 @@ class App {
     };
     const brightnessContrastPass = new ShaderPass(BrightnessContrastShader);
     brightnessContrastPass.enabled = false;
-    colorCorrectionFolder.addBinding(brightnessContrastPass, 'enabled');
-    colorCorrectionFolder.addBinding(colorCorrectionParams, 'brightness', { min: 0.0, max: 2.0 }).on('change', (e) => {
-      brightnessContrastPass.material.uniforms.brightness.value = e.value;
-    });
-    colorCorrectionFolder.addBinding(colorCorrectionParams, 'contrast', { min: 0.0, max: 2.0 }).on('change', (e) => {
-      brightnessContrastPass.material.uniforms.contrast.value = e.value;
-    });
+    colorCorrectionFolder.addBinding(brightnessContrastPass, "enabled");
+    colorCorrectionFolder
+      .addBinding(colorCorrectionParams, "brightness", { min: 0.0, max: 2.0 })
+      .on("change", (e) => {
+        brightnessContrastPass.material.uniforms.brightness.value = e.value;
+      });
+    colorCorrectionFolder
+      .addBinding(colorCorrectionParams, "contrast", { min: 0.0, max: 2.0 })
+      .on("change", (e) => {
+        brightnessContrastPass.material.uniforms.contrast.value = e.value;
+      });
 
     const simonBloom = new BloomPass();
-    const simonFolder = pane.addFolder({ title: 'Bloom' });
-    simonFolder.addBinding(simonBloom, 'enabled');
-    const prefilterFolder = simonFolder.addFolder({ title: 'Prefilter', expanded: false });
-    prefilterFolder.addBinding(simonBloom.Settings.render, 'brightness', { min: 0.0, max: 2.0 });
-    prefilterFolder.addBinding(simonBloom.Settings.render, 'contrast', { min: 0.0, max: 2.0 });
-    prefilterFolder.addBinding(simonBloom.Settings.render, 'saturation', { min: 0.0, max: 2.0 });
-    simonFolder.addBinding(simonBloom.Settings.composite, 'strength', { min: 0.0, max: 2.0 });
-    simonFolder.addBinding(simonBloom.Settings.composite, 'mixFactor', { min: 0.0, max: 1.0 });
-
+    const simonFolder = pane.addFolder({ title: "Bloom" });
+    simonFolder.addBinding(simonBloom, "enabled");
+    const prefilterFolder = simonFolder.addFolder({
+      title: "Prefilter",
+      expanded: false,
+    });
+    prefilterFolder.addBinding(simonBloom.Settings.render, "brightness", {
+      min: 0.0,
+      max: 2.0,
+    });
+    prefilterFolder.addBinding(simonBloom.Settings.render, "contrast", {
+      min: 0.0,
+      max: 2.0,
+    });
+    prefilterFolder.addBinding(simonBloom.Settings.render, "saturation", {
+      min: 0.0,
+      max: 2.0,
+    });
+    simonFolder.addBinding(simonBloom.Settings.composite, "strength", {
+      min: 0.0,
+      max: 2.0,
+    });
+    simonFolder.addBinding(simonBloom.Settings.composite, "mixFactor", {
+      min: 0.0,
+      max: 1.0,
+    });
 
     this.#composer_.addPass(renderPass);
     this.#composer_.addPass(smaaPass);
@@ -271,8 +323,8 @@ class App {
     // const dpr = window.devicePixelRatio;
     const dpr = 1;
     const canvas = this.#threejs_.domElement;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
 
@@ -306,13 +358,24 @@ class App {
     this.#scene_.add(object);
   }
 
+  async loadTexture(path, srbg) {
+    return new Promise((resolve, reject) => {
+      const loader = new THREE.TextureLoader();
+
+      loader.load(path, (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        resolve(tex);
+      });
+    });
+  }
+
   async loadRGBE(path) {
     const rgbeLoader = new RGBELoader();
 
     return new Promise((resolve, reject) => {
-      rgbeLoader.load(path , (hdrTexture) => {
+      rgbeLoader.load(path, (hdrTexture) => {
         hdrTexture.mapping = THREE.EquirectangularReflectionMapping;
-    
+
         this.#scene_.background = hdrTexture;
         this.#scene_.environment = hdrTexture;
 
@@ -322,23 +385,24 @@ class App {
   }
 
   // Override these methods
-  async onSetupProject() {
-  }
+  async onSetupProject() {}
 
-  onRender() {
-  }
+  onRender() {}
 
-  onStep(timeElapsed, totalTimeElapsed) {
-  }
+  onStep(timeElapsed, totalTimeElapsed) {}
 
-  onResize() {
-  }
+  onResize() {}
 
   // Getters
-  get Scene() { return this.#scene_; }
-  get Camera() { return this.#camera_; }
-  get Renderer() { return this.#threejs_; }
+  get Scene() {
+    return this.#scene_;
+  }
+  get Camera() {
+    return this.#camera_;
+  }
+  get Renderer() {
+    return this.#threejs_;
+  }
 }
-
 
 export { App };
