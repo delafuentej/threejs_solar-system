@@ -80,7 +80,7 @@ class App {
     const near = 0.1;
     const far = 1000;
     this.#camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.#camera_.position.set(9, 2, -5);
+    this.#camera_.position.set(-9, 2, -5);
     this.#camera_.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.#controls_ = new OrbitControls(

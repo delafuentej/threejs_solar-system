@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 
 import { PlanetObject, PlanetObjectParams } from "./planet-object.js";
 
@@ -36,13 +35,24 @@ class SolarSystemProject extends App {
       const planetObject = new PlanetObject();
       await planetObject.initialize(planetObjectParams);
 
-      this.objects_.push(planetObject);
+      this.#objects_.push(planetObject);
 
       this.Scene.add(planetObject.mesh);
     }
+
+    //lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.Scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
+    this.Scene.add(pointLight);
   }
 
-  onStep(timeElapsed, totalTime) {}
+  onStep(timeElapsed, totalTime) {
+    for (let i = 0; i < this.#objects_.length; i++) {
+      this.#objects_[i].step(timeElapsed, totalTime);
+    }
+  }
 }
 
 let APP_ = new SolarSystemProject();
