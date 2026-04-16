@@ -1,0 +1,29 @@
+{
+  "name": "package",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^4.4.9",
+    "vite-plugin-restart": "^0.4.1"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.14.0",
+    "@gltf-transform/cli": "^4.1.0",
+    "@gltf-transform/core": "^4.1.0",
+    "@gltf-transform/extensions": "^4.1.0",
+    "@gltf-transform/functions": "^4.1.0",
+    "augmented-ui": "^2.0.0",
+    "draco3d": "^1.5.7",
+    "draco3dgltf": "^1.5.7",
+    "mersennetwister": "^0.2.3",
+    "meshline": "^3.3.1",
+    "three": "^0.167.1",
+    "tweakpane": "^4.0.3"
+  }
+}
