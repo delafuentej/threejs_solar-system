@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Object } from "./object";
+import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 
 class PlanetObjectParams {
   name = "";
@@ -13,6 +14,8 @@ class PlanetObjectParams {
 
 class PlanetObject extends Object {
   #mesh_ = null;
+  #orbitMesh_ = null;
+  #group_ = new THREE.Group();
   constructor() {
     super();
   }
@@ -48,11 +51,53 @@ class PlanetObject extends Object {
         plane.lookAt(camera.position);
       };
       sphere.add(plane);
+    } else {
+      this.#orbitMesh_ = await this.#buildOrbitMesh_(params);
+      this.#group_.add(this.#orbitMesh_);
     }
 
     this.#mesh_ = sphere;
 
-    console.log(this.#mesh_);
+    this.#group_.add(sphere);
+
+    //  console.log(this.#mesh_);
+  }
+
+  async #buildOrbitMesh_(params) {
+    const points = [];
+    const SEGMENTS = 128;
+    for (let i = 0; i <= SEGMENTS; i++) {
+      const angle = (i / SEGMENTS) * Math.PI * 2;
+      const x = Math.cos(angle) * params.data.distance * 50.0;
+      const z = Math.sin(angle) * params.data.distance * 50.0;
+      points.push(new THREE.Vector3(x, 0, z));
+      console.log("orbit points", points);
+    }
+
+    // const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const geometry = new MeshLineGeometry();
+    geometry.setPoints(points);
+    // const material = new THREE.LineBasicMaterial({
+    // color: 0xfffff,
+    // linewidth: 3,
+    // });
+    const orbitPathTexture = await this.loadTexture(
+      "./resources/textures/orbit-path.png",
+      true,
+    );
+    orbitPathTexture.anisotropy = 12;
+    const material = new MeshLineMaterial({
+      map: orbitPathTexture,
+      useMap: true,
+      color: new THREE.Color(0xffffff),
+      lineWidth: 0.2,
+      sizeAttenuation: 1,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.2,
+    });
+    const line = new THREE.Mesh(geometry, material);
+    return line;
   }
 
   async #createMaterial_(params) {
@@ -111,6 +156,10 @@ class PlanetObject extends Object {
 
   get mesh() {
     return this.#mesh_;
+  }
+
+  get group() {
+    return this.#group_;
   }
 }
 

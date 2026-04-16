@@ -37,7 +37,7 @@ class SolarSystemProject extends App {
 
       this.#objects_.push(planetObject);
 
-      this.Scene.add(planetObject.mesh);
+      this.Scene.add(planetObject.group);
     }
 
     //lights
