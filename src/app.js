@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { Pane } from "tweakpane";
 
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -356,6 +357,33 @@ class App {
 
   addToScene(object) {
     this.#scene_.add(object);
+  }
+
+  async loadShader_(name, uniforms) {
+    const vertexShader = await fetch(
+      `./resources/shaders/${name}/vertex.glsl`,
+    ).then((res) => res.text());
+    const fragmentShader = await fetch(
+      `./resources/shaders/${name}/fragment.glsl`,
+    ).then((res) => res.text());
+    //
+    //   const sunVertexShaderText = await sunVertexShader.text();
+    //   const sunFragmentShaderText = await sunFragmentShader.text();
+    const mat = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      fragmentShader: fragmentShader,
+      vertexShader: vertexShader,
+    });
+    return mat;
+  }
+
+  async loadGLTF(path) {
+    return new Promise((resolve, reject) => {
+      const loader = new GLTFLoader();
+      loader.load(path, (gltf) => {
+        resolve(gltf.scene);
+      });
+    });
   }
 
   async loadTexture(path, srbg) {

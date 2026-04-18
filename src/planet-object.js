@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { Object } from "./object";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 class PlanetObjectParams {
   name = "";
   texture = null;
   data = null;
+  physics = null;
   //   radius = 0;
   //   distance = 0;
   //   orbitTime = 0;
@@ -16,6 +18,9 @@ class PlanetObject extends Object {
   #mesh_ = null;
   #orbitMesh_ = null;
   #group_ = new THREE.Group();
+  #rigidBody_ = null;
+  #collider_ = null;
+  #data_ = null;
   constructor() {
     super();
   }
@@ -58,6 +63,25 @@ class PlanetObject extends Object {
 
     this.#mesh_ = sphere;
 
+    this.#mesh_.name = params.data.name;
+
+    this.#data_ = params.data;
+
+    // to create a physics object
+    const rigidBodyDesc = RAPIER.RigidBodyDesc.fixed();
+    rigidBodyDesc.setTranslation(
+      this.#mesh_.position.x,
+      this.#mesh_.position.y,
+      this.#mesh_.position.z,
+    );
+
+    const rigidBody = params.physics.createRigidBody(rigidBodyDesc);
+    const colliderDesc = RAPIER.ColliderDesc.ball(params.data.radius);
+    const collider = params.physics.createCollider(colliderDesc, rigidBody);
+
+    this.#rigidBody_ = rigidBody;
+    this.#collider_ = collider;
+
     this.#group_.add(sphere);
 
     //  console.log(this.#mesh_);
@@ -71,7 +95,7 @@ class PlanetObject extends Object {
       const x = Math.cos(angle) * params.data.distance * 50.0;
       const z = Math.sin(angle) * params.data.distance * 50.0;
       points.push(new THREE.Vector3(x, 0, z));
-      console.log("orbit points", points);
+      // console.log("orbit points", points);
     }
 
     // const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -143,6 +167,33 @@ class PlanetObject extends Object {
       vertexShader: vertexShader,
     });
     return mat;
+  }
+
+  onRayCast(hit) {
+    if (hit.collider.handle === this.#collider_.handle) {
+      if (this.#orbitMesh_) {
+        this.#orbitMesh_.material.color.setRGB(16, 1, 1);
+        this.#orbitMesh_.material.opacity = 1;
+        this.#orbitMesh_.material.lineWidth = this.#data_.radius * 0.5;
+        this.#orbitMesh_.material.needsUpdate = true;
+        // console.log("hit planet:", this.#mesh_.name);
+        // if (this.#mesh_.material.emissive) {
+        // this.#mesh_.material.emissive.set(0xff0000);
+        // }
+      }
+      return true;
+    } else {
+      if (this.#orbitMesh_) {
+        this.#orbitMesh_.material.color.setRGB(1, 1, 1);
+        this.#orbitMesh_.material.opacity = 0.1;
+        this.#orbitMesh_.material.lineWidth = this.#data_.radius * 0.25;
+        this.#orbitMesh_.material.needsUpdate = true;
+        // if (this.#mesh_.material.emissive) {
+        // this.#mesh_.material.emissive.set(0x000000);
+        // }
+      }
+      return false;
+    }
   }
 
   step(timeElapsed, totalTime) {
