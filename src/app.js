@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { Pane } from "tweakpane";
@@ -22,7 +22,7 @@ class App {
   #camera_ = null;
   #scene_ = null;
   #clock_ = null;
-  #controls_ = null;
+  // #controls_ = null;
 
   #composer_ = null;
   #debugUI_ = null;
@@ -84,15 +84,15 @@ class App {
     this.#camera_.position.set(-9, 2, -5);
     this.#camera_.lookAt(new THREE.Vector3(0, 0, 0));
 
-    this.#controls_ = new OrbitControls(
-      this.#camera_,
-      this.#threejs_.domElement,
-    );
-    this.#controls_.enableDamping = true;
+    // this.#controls_ = new OrbitControls(
+    // this.#camera_,
+    // this.#threejs_.domElement,
+    // );
+    // this.#controls_.enableDamping = true;
     // this.#controls_.target.set(0, 0, 0);
-    this.#controls_.minDistance = 1;
-    this.#controls_.maxDistance = 100;
-    this.#controls_.update();
+    // this.#controls_.minDistance = 1;
+    // this.#controls_.maxDistance = 100;
+    // this.#controls_.update();
 
     this.#scene_ = new THREE.Scene();
     this.#scene_.background = new THREE.Color(0x000000);
@@ -351,7 +351,7 @@ class App {
   }
 
   #step_(timeElapsed) {
-    this.#controls_.update(timeElapsed);
+    //  this.#controls_.update(timeElapsed);
     this.onStep(timeElapsed, this.#clock_.getElapsedTime());
   }
 

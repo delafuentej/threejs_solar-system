@@ -2,6 +2,7 @@ import * as THREE from "three";
 import RAPIER from "@dimforge/rapier3d-compat";
 import { PlanetObject, PlanetObjectParams } from "./planet-object.js";
 import { InputManager } from "./input-manager.js";
+import { CameraChangeObject } from "./camera-change-object.js";
 
 import { App } from "./app.js";
 
@@ -11,6 +12,8 @@ class SolarSystemProject extends App {
   #physicsTimeAcc_ = null;
   #rapierWorld_ = 0.0;
   #selectionMesh_ = null;
+  #cameraChange_ = null;
+
   constructor() {
     super();
   }
@@ -19,6 +22,8 @@ class SolarSystemProject extends App {
     this.#inputManager_.initialize();
 
     // console.log(this.#inputManager_);
+    this.#cameraChange_ = new CameraChangeObject(this.Camera, this.Renderer);
+    this.#objects_.push(this.#cameraChange_);
 
     await this.#setupPhysics_();
     await this.#setupScene_();
@@ -138,6 +143,7 @@ class SolarSystemProject extends App {
             this.#selectionMesh_.visible = true;
 
             this.#objects_[i].mesh.add(this.#selectionMesh_);
+            this.#cameraChange_.lerpTo(this.#objects_[i]);
           }
         }
       } else {
