@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import RAPIER from "@dimforge/rapier3d-compat";
 import { PlanetObject, PlanetObjectParams } from "./planet-object.js";
+import {Lensflare, LensflareElement} from "three/addons/objects/Lensflare.js"
+import {CameraChangeObject} from "./camera-change-object"
 import { InputManager } from "./input-manager.js";
-import { CameraChangeObject } from "./camera-change-object.js";
 
 import { App } from "./app.js";
 
@@ -102,6 +103,9 @@ class SolarSystemProject extends App {
     }
     this.#selectedObject_(planets["Sun"]);
     //  console.log.log(this.#targetPlanet_(planets["Sun"]));
+
+    //lens flare
+
   }
 
   async #setupPhysics_() {
