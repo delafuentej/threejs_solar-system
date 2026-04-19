@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { RGBELoader } from "three/addons/loaders/RGBELoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
 import { Pane } from "tweakpane";
 
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -23,6 +24,8 @@ class App {
   #scene_ = null;
   #clock_ = null;
   // #controls_ = null;
+
+  #ktx2Loader_ = null;
 
   #composer_ = null;
   #debugUI_ = null;
@@ -48,6 +51,7 @@ class App {
 
   async #setupProject_() {
     await this.#setupRenderer_();
+    //await this#setupLoaders_();
 
     // Initialize post fx
     const postFXFolder = this.#debugUI_.addFolder({
@@ -64,6 +68,12 @@ class App {
     });
 
     await this.onSetupProject(projectFolder);
+  }
+
+  async #setupLoaders_() {
+    this.#ktx2Loader_ = new KTX2Loader();
+    this.#ktx2Loader_.setTranscoderPath("./libs/basis/");
+    this.#ktx2Loader_.detectSupport(this.#threejs_);
   }
 
   async #setupRenderer_() {
@@ -386,12 +396,24 @@ class App {
     });
   }
 
-  async loadTexture(path, srbg) {
+  async loadKTX2(path, srgb) {
+    return new Promise((resolve, reject) => {
+      const loader = new KTX2Loader();
+      loader.load(path, (tex) => {
+        if (srgb) {
+          tex.colorSpace = THREE.SRGBColorSpace;
+        }
+        resolve(tex);
+      });
+    });
+  }
+
+  async loadTexture(path, srgb) {
     return new Promise((resolve, reject) => {
       const loader = new THREE.TextureLoader();
 
       loader.load(path, (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace;
+        if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
         resolve(tex);
       });
     });

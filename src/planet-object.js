@@ -1,13 +1,18 @@
 import * as THREE from "three";
 import { Object } from "./object";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+
+
+const DIST_MULTIPLIER = 50.0;
 
 class PlanetObjectParams {
   name = "";
   texture = null;
   data = null;
   physics = null;
+    textureLoader_ = null;
   //   radius = 0;
   //   distance = 0;
   //   orbitTime = 0;
@@ -21,6 +26,8 @@ class PlanetObject extends Object {
   #rigidBody_ = null;
   #collider_ = null;
   #data_ = null;
+  #loader_ = null;
+  #angle_ = 0.0;
   constructor() {
     super();
   }
@@ -36,11 +43,14 @@ class PlanetObject extends Object {
       params.data.radius,
     );
 
+    this.#data_ = params.data;
+    this.#loader_ = params.textureLoader;
+
     if (params.data.name === "Sun") {
       const planeGeometry = new THREE.PlaneGeometry(1, 1);
       const planeMaterial = await this.#loadShader_("sun-corona", {
         map: {
-          value: await this.loadTexture(
+          value: await this.#loadTexture(
             "./resources/textures/lens-mod.png",
             true,
           ),
@@ -65,7 +75,9 @@ class PlanetObject extends Object {
 
     this.#mesh_.name = params.data.name;
 
-    this.#data_ = params.data;
+   
+
+   
 
     // to create a physics object
     const rigidBodyDesc = RAPIER.RigidBodyDesc.fixed();
@@ -105,7 +117,7 @@ class PlanetObject extends Object {
     // color: 0xfffff,
     // linewidth: 3,
     // });
-    const orbitPathTexture = await this.loadTexture(
+    const orbitPathTexture = await this.#loadTexture(
       "./resources/textures/orbit-path.png",
       true,
     );
@@ -120,6 +132,8 @@ class PlanetObject extends Object {
       blending: THREE.AdditiveBlending,
       opacity: 0.2,
     });
+    material.depthTest = true;
+    material.depthWrite = false;
     const line = new THREE.Mesh(geometry, material);
     return line;
   }
@@ -139,17 +153,21 @@ class PlanetObject extends Object {
       return mat;
     }
   }
-
-  async loadTexture(path, srgb) {
-    return new Promise((resolve, reject) => {
-      const loader = new THREE.TextureLoader();
-      loader.load(path, (tex) => {
-        if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
-
-        resolve(tex);
-      });
+  async loadKTX2(path, srgb) {
+  return new Promise((resolve, reject) => {
+    const loader = new KTX2Loader();
+    loader.load(path, (tex) => {
+      if (srgb) {
+        tex.colorSpace = THREE.SRGBColorSpace;
+      }
+      resolve(tex);
     });
-  }
+  });
+}
+async #loadTexture(url, srgb) {
+    return  this.#loader_.loadTexture(url, srgb);
+}
+
 
   async #loadShader_(name, uniforms) {
     const vertexShader = await fetch(
@@ -169,17 +187,28 @@ class PlanetObject extends Object {
     return mat;
   }
 
+  setHighlighted() {
+    if (this.#orbitMesh_) {
+      this.#orbitMesh_.material.color.setRGB(16, 1, 1);
+      this.#orbitMesh_.material.opacity = 1;
+      this.#orbitMesh_.material.lineWidth = this.#data_.radius * 0.5;
+      this.#orbitMesh_.material.needsUpdate = true;
+    }
+
+    const title = document.getElementById("planet-info-title");
+    title.innerText = this.#data_.name;
+    const desc = document.getElementById("planet-info-description");
+    desc.innerText = this.#data_.description;
+    // console.log("hit planet:", this.#mesh_.name);
+    // if (this.#mesh_.material.emissive) {
+    // this.#mesh_.material.emissive.set(0xff0000);
+    // }
+  }
+
   onRayCast(hit) {
     if (hit.collider.handle === this.#collider_.handle) {
       if (this.#orbitMesh_) {
-        this.#orbitMesh_.material.color.setRGB(16, 1, 1);
-        this.#orbitMesh_.material.opacity = 1;
-        this.#orbitMesh_.material.lineWidth = this.#data_.radius * 0.5;
-        this.#orbitMesh_.material.needsUpdate = true;
-        // console.log("hit planet:", this.#mesh_.name);
-        // if (this.#mesh_.material.emissive) {
-        // this.#mesh_.material.emissive.set(0xff0000);
-        // }
+        this.setHighlighted();
       }
       return true;
     } else {
@@ -199,10 +228,29 @@ class PlanetObject extends Object {
   step(timeElapsed, totalTime) {
     //  console.log("STEP RUNNING", totalTime);
 
+    timeElapsed = 0;
+
     if (this.#mesh_?.material?.uniforms?.time) {
       //  console.log("totalTime", totalTime);
       this.#mesh_.material.uniforms.time.value = totalTime;
     }
+
+    if(this.#data_.orbitTime == 0) return;
+    this.#angle_ += timeElapsed * 0.1 / this.#data_.orbitTime;
+
+    const a = this.#data_.distance;
+    const b = this.#data_.distance;
+
+    this.#mesh_.position.set(
+      a * Math.cos(this.#angle_) * DIST_MULTIPLIER,
+      0,
+      b * Math.sin(this.#angle_) * DIST_MULTIPLIER
+    )
+
+    const v = new RAPIER.Vector3(
+      this.#mesh_.position.x, this.#mesh_.position.y, this.#mesh_.position.z
+    );
+    this.#collider_.setTranslation(v);
   }
 
   get mesh() {

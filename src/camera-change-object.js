@@ -34,7 +34,12 @@ class CameraChangeObject extends Object {
     return controls;
   }
 
+  isBusy() {
+    return this.#controls_ === null;
+  }
+
   lerpTo(target) {
+    if(this.#target_ === target) return;
     this.#target_ = target;
     this.#timer_ = 0;
     if (this.#controls_) {

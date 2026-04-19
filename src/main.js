@@ -13,6 +13,7 @@ class SolarSystemProject extends App {
   #rapierWorld_ = 0.0;
   #selectionMesh_ = null;
   #cameraChange_ = null;
+  //  #targetPlanet_ = null;
 
   constructor() {
     super();
@@ -29,6 +30,7 @@ class SolarSystemProject extends App {
     await this.#setupScene_();
     await this.#loadPlanets_();
     await this.#loadSelection_();
+    await this.#loadPlanets_();
   }
 
   async #setupScene_() {
@@ -73,6 +75,8 @@ class SolarSystemProject extends App {
     const planetDataArr = await fetch("./resources/planets.json").then((res) =>
       res.json(),
     );
+
+    const planets = {};
     //console.log(planetDataArr);
     for (let i = 0; i < planetDataArr.length; i++) {
       const currentPlanet = planetDataArr[i];
@@ -85,11 +89,19 @@ class SolarSystemProject extends App {
       planetObjectParams.data = currentPlanet;
       //physics world
       planetObjectParams.physics = this.#rapierWorld_;
+
+      planetObjectParams.textureLoader = this;
       const planetObject = new PlanetObject();
       await planetObject.initialize(planetObjectParams);
       this.#objects_.push(planetObject);
       this.Scene.add(planetObject.group);
+
+      planets[currentPlanet["name"]] = planetObject;
+      console.log("xxxxxx", (planets[currentPlanet.name] = planetObject));
+      console.log("planets", planets);
     }
+    this.#selectedObject_(planets["Sun"]);
+    //  console.log.log(this.#targetPlanet_(planets["Sun"]));
   }
 
   async #setupPhysics_() {
@@ -119,6 +131,7 @@ class SolarSystemProject extends App {
   }
 
   #castRay_() {
+    if (this.#cameraChange_.isBusy()) return;
     const pointer = this.#inputManager_.Pointer;
     const prevPointer = this.#inputManager_.PrevPointer;
     if (!pointer.left && prevPointer.left) {
@@ -138,17 +151,23 @@ class SolarSystemProject extends App {
         console.log("hit", hit);
         for (let i = 0; i < this.#objects_.length; i++) {
           if (this.#objects_[i].onRayCast(hit)) {
-            this.#selectionMesh_.removeFromParent();
-            this.#selectionMesh_.scale.setScalar(1.31);
-            this.#selectionMesh_.visible = true;
-
-            this.#objects_[i].mesh.add(this.#selectionMesh_);
-            this.#cameraChange_.lerpTo(this.#objects_[i]);
+            this.#selectedObject_(this.#objects_[i]);
           }
         }
       } else {
         console.log("no hit");
       }
+    }
+  }
+
+  #selectedObject_(obj) {
+    if (this.#selectionMesh_) {
+      this.#selectionMesh_.removeFromParent();
+      this.#selectionMesh_.scale.setScalar(1.31);
+      this.#selectionMesh_.visible = true;
+      obj.mesh.add(this.#selectionMesh_);
+      obj.setHighlighted();
+      this.#cameraChange_.lerpTo(obj);
     }
   }
 
