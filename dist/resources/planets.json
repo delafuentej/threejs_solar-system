@@ -1,0 +1,82 @@
+[
+    {
+        "name": "Sun",
+        "texture": "sun",
+        "radius": 1,
+        "distance": 0,
+        "orbitTime": 0,
+        "description": "The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, with internal convective motion that generates a magnetic field via a dynamo process. It is by far the most important source of energy for life on Earth."
+    },
+    {
+        "name": "Mercury",
+        "texture": "mercury",
+        "radius": 0.383,
+        "distance": 0.39,
+        "orbitTime": 0.24,
+        "dayLength": 58.65,
+        "description": "Mercury is the smallest and innermost planet in the Solar System. Its orbit around the Sun takes 87.97 Earth days, the shortest of all the planets in the Solar System."
+    },
+    {
+        "name": "Venus",
+        "texture": "venus_surface",
+        "radius": 0.949,
+        "distance": 0.72,
+        "orbitTime": 0.62,
+        "dayLength": 243,
+        "description": "Venus, often called Earth's \"sister planet\" due to its similar size and composition, is the second planet from the Sun in our solar system. However, Venus has an environment that is incredibly hostile and vastly different from Earth's."
+    },
+    {
+        "name": "Earth",
+        "texture": "earth_daymap",
+        "radius": 1,
+        "distance": 1,
+        "orbitTime": 1,
+        "dayLength": 1,
+        "description": "Earth is the third planet from the Sun and the only astronomical object known to harbor life. According to radiometric dating and other sources of evidence, Earth formed over 4.5 billion years ago."
+    },
+    {
+        "name": "Mars",
+        "texture": "mars",
+        "radius": 0.532,
+        "distance": 1.52,
+        "orbitTime": 1.88,
+        "dayLength": 1.03,
+        "description": "Mars is the fourth planet from the Sun and the second smallest planet in the Solar System, being only larger than Mercury. In English, Mars carries the name of the Roman god of war and is often referred to as the \"Red Planet\"."
+    },
+    {
+        "name": "Jupiter",
+        "texture": "jupiter",
+        "radius": 11.21,
+        "distance": 5.20,
+        "orbitTime": 11.86,
+        "dayLength": 0.41,
+        "description": "Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a gas giant with a mass one-thousandth that of the Sun, but two-and-a-half times that of all the other planets in the Solar System combined."
+    },
+    {
+        "name": "Saturn",
+        "texture": "saturn",
+        "radius": 9.45,
+        "distance": 9.58,
+        "orbitTime": 29.46,
+        "dayLength": 0.45,
+        "description": "Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth."
+    },
+    {
+        "name": "Uranus",
+        "texture": "uranus",
+        "radius": 4.01,
+        "distance": 19.22,
+        "orbitTime": 84.01,
+        "dayLength": 0.72,
+        "description": "Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System."
+    },
+    {
+        "name": "Neptune",
+        "texture": "neptune",
+        "radius": 3.88,
+        "distance": 30.05,
+        "orbitTime": 164.8,
+        "dayLength": 0.67,
+        "description": "Neptune is the eighth and farthest known planet from the Sun in the Solar System. In the Solar System, it is the fourth-largest planet by diameter, the third-most-massive planet, and the densest giant planet."
+    }
+]

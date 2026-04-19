@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import RAPIER from "@dimforge/rapier3d-compat";
 import { PlanetObject, PlanetObjectParams } from "./planet-object.js";
-import {Lensflare, LensflareElement} from "three/addons/objects/Lensflare.js"
-import {CameraChangeObject} from "./camera-change-object"
+import { Lensflare, LensflareElement } from "three/addons/objects/Lensflare.js";
+import { CameraChangeObject } from "./camera-change-object";
 import { InputManager } from "./input-manager.js";
 
 import { App } from "./app.js";
@@ -98,14 +98,13 @@ class SolarSystemProject extends App {
       this.Scene.add(planetObject.group);
 
       planets[currentPlanet["name"]] = planetObject;
-      console.log("xxxxxx", (planets[currentPlanet.name] = planetObject));
-      console.log("planets", planets);
+      // console.log("xxxxxx", (planets[currentPlanet.name] = planetObject));
+      //console.log("planets", planets);
     }
     this.#selectedObject_(planets["Sun"]);
     //  console.log.log(this.#targetPlanet_(planets["Sun"]));
 
     //lens flare
-
   }
 
   async #setupPhysics_() {
@@ -152,14 +151,14 @@ class SolarSystemProject extends App {
       );
       const hit = this.#rapierWorld_.castRay(ray, 1000.0, true);
       if (hit) {
-        console.log("hit", hit);
+        //   console.log("hit", hit);
         for (let i = 0; i < this.#objects_.length; i++) {
           if (this.#objects_[i].onRayCast(hit)) {
             this.#selectedObject_(this.#objects_[i]);
           }
         }
       } else {
-        console.log("no hit");
+        // console.log("no hit");
       }
     }
   }
