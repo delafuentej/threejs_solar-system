@@ -99,7 +99,7 @@ class SolarSystemProject extends App {
 
       planets[currentPlanet["name"]] = planetObject;
       // console.log("xxxxxx", (planets[currentPlanet.name] = planetObject));
-      //console.log("planets", planets);
+      //. console.log("planets", planets);
     }
     this.#selectedObject_(planets["Sun"]);
     //  console.log.log(this.#targetPlanet_(planets["Sun"]));
